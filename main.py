@@ -1,53 +1,36 @@
 import openpyxl 
+from product_supplier import product_supplier
+from total_inventory import total_inventory
+from load_inventory import load_file
+from products_less_ten import product_less_ten
+from new_column import new_column 
 
-inv_file = openpyxl.load_workbook("inventory.xlsx") #this will give us whole file content
-product_info = inv_file["Sheet1"] # information of sheet 1 is in variabnle whole_inoformtio
 
-
-#first task is to count number of the companies and their total count, and storew it in the Dict
-
-
-product_per_supplier= {}
-
-total_inventory = {}
-
-info_less_ten = {}
-
+def main():
+    input_file = "inventory.xlsx"
+    output_file = "inv_updated.xlsx"
+      
+    inv_file, product_info=load_file(input_file)
 #product per supplier
-for cursor in range(2, product_info.max_row+1): #by default the max_row starts with 0, and so it will be 0 to 74, so we are adding +1
-    supplier_name = product_info.cell(cursor, 4).value #row second, column 4 (2,4)    
-    if supplier_name in product_per_supplier:
-        count_supplier_name = product_per_supplier[supplier_name]
-        product_per_supplier[supplier_name] = count_supplier_name+1  # +1 in total, so i need the count 
-    else:
-        #print("New Supplie added")
-        product_per_supplier[supplier_name]=1
+    product_supplier_count = product_supplier(product_info)
 
 #total inventory 
-    
-    if supplier_name in total_inventory:
-        
-        previous_value= total_inventory[supplier_name]           
-        total_inventory[supplier_name] = previous_value+(product_info.cell(cursor, 2).value*product_info.cell(cursor,3).value) 
-
-    else:
-        print("New value added")
-        total_inventory[supplier_name] = product_info.cell(cursor, 2).value*product_info.cell(cursor,3).value 
-
-
+    totalinventory_count= total_inventory(product_info)
+   
 #products with inventory less 10 
 
-    
-    if product_info.cell(cursor, 2).value < 10:
-        info_less_ten[int(product_info.cell(cursor,1).value)] = int(product_info.cell(cursor, 2).value) #bty defualt the values are interpreted as float numbers 
-
+    product_less_ten_count = product_less_ten(product_info)
+  
 #new column , 5th column with the price*inventory 
-
-    product_info.cell(cursor, 5).value = product_info.cell(cursor, 2).value * product_info.cell(cursor,3).value
+    new_column(product_info)
     
-inv_file.save("inv_updated.xlsx")
+    inv_file.save(output_file)
 
 
-print(product_per_supplier)
-print(total_inventory)
-print(info_less_ten)
+    print("This is the total product supplier information", product_supplier_count)
+    print("This is the total inventory", totalinventory_count)
+    print("This is the information less than the ten", product_less_ten_count)
+
+
+if __name__ == "__main__":
+    main()
